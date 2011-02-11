@@ -15,6 +15,11 @@ Requirements
   * +ruby
   * +signs
 
+Installation
+------------
+
+curl https://github.com/fousa/vim-flog/raw/master/plugin/flog.vim -o ~/piep.vim
+
 Configuration
 -------------
 
