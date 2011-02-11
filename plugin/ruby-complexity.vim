@@ -11,9 +11,10 @@ if !has('ruby')
   finish
 endif
 
-let s:low_complexity_color    = "#004400"
-let s:medium_complexity_color = "#bbbb00"
-let s:high_complexity_color   = "#ff2222"
+let s:low_complexity_color    = "#a5c261"
+let s:medium_complexity_color = "#ffc66d"
+let s:high_complexity_color   = "#cc7833"
+let s:background_color        = "#323232"
 let s:medium_limit            = 7
 let s:high_limit              = 14
 
@@ -27,6 +28,10 @@ endif
 
 if exists("g:rubycomplexity_color_high")
   let s:high_complexity_color = g:rubycomplexity_color_high
+endif
+
+if exists("g:rubycomplexity_color_background")
+  let s:background_color = g:rubycomplexity_color_background
 endif
 
 if exists("g:rubycomplexity_medium_limit")
@@ -129,18 +134,20 @@ def show_complexity(results = {})
       when medium_limit..high_limit then "medium_complexity"
       else                               "high_complexity"
     end
-    (line_number..rest[2]).each do |line|
-      VIM.command ":sign place #{line} line=#{line} name=#{complexity} file=#{VIM::Buffer.current.name}"
-    end
+		value = rest[0].to_i
+		value = 99 if value >= 100
+		VIM.command ":sign define #{value.to_s} text=#{value.to_s} texthl=#{complexity}"
+    VIM.command ":sign place #{line_number} line=#{line_number} name=#{value.to_s} file=#{VIM::Buffer.current.name}"
   end
 end
 
 EOF
 
 function! s:UpdateHighlighting()
-  exe 'hi low_complexity guifg='.s:low_complexity_color.' guibg='.s:low_complexity_color
-  exe 'hi medium_complexity guifg='.s:medium_complexity_color.' guibg='.s:medium_complexity_color
-  exe 'hi high_complexity guifg='.s:high_complexity_color.' guibg='.s:high_complexity_color
+  exe 'hi low_complexity guifg='.s:low_complexity_color
+  exe 'hi medium_complexity guifg='.s:medium_complexity_color
+  exe 'hi high_complexity guifg='.s:high_complexity_color
+	exe 'hi SignColumn guifg=#999999 guibg='.s:background_color.' gui=NONE'
 endfunction
 
 function! ShowComplexity()
@@ -162,8 +169,6 @@ EOF
 call s:UpdateHighlighting()
 
 endfunction
-
-hi SignColumn guifg=fg guibg=bg
 
 call s:UpdateHighlighting()
 
