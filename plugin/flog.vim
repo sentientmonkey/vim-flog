@@ -1,45 +1,43 @@
-" File:        ruby-complexity.vim
+" File:        flog.vim
 " Description: Ruby cyclomatic complexity analizer
 " Author:      Max Vasiliev <vim@skammer.name>
+" Author:      Jelle Vandebeeck <jelle@fousa.be>
 " Licence:     WTFPL
 " Version:     0.0.2
 
-if !has('signs')
-  finish
-endif
-if !has('ruby')
+if !has('signs') || !has('ruby')
   finish
 endif
 
-let s:low_complexity_color    = "#a5c261"
-let s:medium_complexity_color = "#ffc66d"
-let s:high_complexity_color   = "#cc7833"
-let s:background_color        = "#323232"
-let s:medium_limit            = 7
-let s:high_limit              = 14
+let s:green_color      = "#a5c261"
+let s:orange_color     = "#ffc66d"
+let s:red_color        = "#cc7833"
+let s:background_color = "#323232"
+let s:orange_limit     = 10
+let s:red_limit        = 20
 
-if exists("g:rubycomplexity_color_low")
-  let s:low_complexity_color = g:rubycomplexity_color_low
+if exists("g:flog_green_color")
+  let s:green_color = g:flog_green_color
 endif
 
-if exists("g:rubycomplexity_color_medium")
-  let s:medium_complexity_color = g:rubycomplexity_color_medium
+if exists("g:flog_orange_color")
+  let s:orange_color = g:flog_orange_color
 endif
 
-if exists("g:rubycomplexity_color_high")
-  let s:high_complexity_color = g:rubycomplexity_color_high
+if exists("g:flog_red_color")
+  let s:red_color = g:flog_red_color
 endif
 
-if exists("g:rubycomplexity_color_background")
-  let s:background_color = g:rubycomplexity_color_background
+if exists("g:flog_background_color")
+  let s:background_color = g:flog_background_color
 endif
 
-if exists("g:rubycomplexity_medium_limit")
-  let s:medium_limit = g:rubycomplexity_medium_limit
+if exists("g:flog_orange_limit")
+  let s:orange_limit = g:flog_orange_limit
 endif
 
-if exists("g:rubycomplexity_high_limit")
-  let s:high_limit = g:rubycomplexity_high_limit
+if exists("g:flog_red_limit")
+  let s:red_limit = g:flog_red_limit
 endif
 
 ruby << EOF
@@ -127,12 +125,12 @@ end
 def show_complexity(results = {})
   VIM.command ":silent sign unplace file=#{VIM::Buffer.current.name}"
   results.each do |line_number, rest|
-    medium_limit = VIM::evaluate('s:medium_limit')
-    high_limit = VIM::evaluate('s:high_limit')
+    orange_limit = VIM::evaluate('s:orange_limit')
+    red_limit = VIM::evaluate('s:red_limit')
     complexity = case rest[0]
-      when 0..medium_limit          then "low_complexity"
-      when medium_limit..high_limit then "medium_complexity"
-      else                               "high_complexity"
+      when 0..orange_limit         then "green_complexity"
+      when orange_limit..red_limit then "orange_complexity"
+      else                              "red_complexity"
     end
 		value = rest[0].to_i
 		value = 99 if value >= 100
@@ -144,9 +142,9 @@ end
 EOF
 
 function! s:UpdateHighlighting()
-  exe 'hi low_complexity guifg='.s:low_complexity_color
-  exe 'hi medium_complexity guifg='.s:medium_complexity_color
-  exe 'hi high_complexity guifg='.s:high_complexity_color
+  exe 'hi green_complexity guifg='.s:green_color
+  exe 'hi orange_complexity guifg='.s:orange_color
+  exe 'hi red_complexity guifg='.s:red_color
 	exe 'hi SignColumn guifg=#999999 guibg='.s:background_color.' gui=NONE'
 endfunction
 
@@ -172,11 +170,11 @@ endfunction
 
 call s:UpdateHighlighting()
 
-sign define low_complexity    text=XX texthl=low_complexity
-sign define medium_complexity text=XX texthl=medium_complexity
-sign define high_complexity   text=XX texthl=high_complexity
+sign define green_color    text=XX texthl=green_complexity
+sign define orange_color text=XX texthl=orange_complexity
+sign define red_color   text=XX texthl=red_complexity
 
 
-if !exists("g:rubycomplexity_enable_at_startup") || g:rubycomplexity_enable_at_startup
+if !exists("g:flow_enable") || g:flog_enable
   autocmd! BufReadPost,BufWritePost,FileReadPost,FileWritePost *.rb call ShowComplexity()
 endif
