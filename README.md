@@ -21,6 +21,10 @@ Installation
 
 First of all make sure you have a Vim installed with Ruby support. If you use MacVim than you can build your own version of Vim like [this](https://github.com/b4winckler/macvim/wiki/Building).
 
+Here is an example of my configuration during the build:
+
+`./configure --with-features=huge --enable-rubyinterp --enable-pythininterp --enable-perlinterp --enable-cscope`
+
 Install the Flog gem like this: `gem install flog`.
 
 To install the plugin just run this command in your Terminal:
