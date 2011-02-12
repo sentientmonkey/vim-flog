@@ -5,7 +5,7 @@ _(Forked from [Ruby Cyclomatic Complexity Plugin](https://github.com/skammer/vim
 
 Indicates the Flog number in front of the action in your Ruby code to indicate the complexity.
 
-![Screen shot](https://github.com/skammer/vim-ruby-complexity/raw/master/Screen%20shot%202010-11-29%20at%2013.23.46.png)
+![Screen shot](http://10to1.blog.s3.amazonaws.com/vim-flog.png)
 
 Requirements
 ------------
