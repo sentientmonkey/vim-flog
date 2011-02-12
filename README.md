@@ -16,7 +16,8 @@ Requirements
   * +ruby
   * +signs
 
-<h2 id="installation">Installation</h2>
+Installation
+------------
 
 First of all make sure you have a Vim installed with Ruby support. If you use MacVim than you can build your own version of Vim like [this](https://github.com/b4winckler/macvim/wiki/Building).
 
