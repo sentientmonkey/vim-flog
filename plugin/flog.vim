@@ -9,35 +9,35 @@ if !has('signs') || !has('ruby')
   finish
 endif
 
-let s:green_color      = "#a5c261"
-let s:orange_color     = "#ffc66d"
-let s:red_color        = "#cc7833"
+let s:low_color        = "#a5c261"
+let s:medium_color     = "#ffc66d"
+let s:high_color       = "#cc7833"
 let s:background_color = "#323232"
-let s:orange_limit     = 10
-let s:red_limit        = 20
+let s:medium_limit     = 10
+let s:high_limit       = 20
 
-if exists("g:flog_green_color")
-  let s:green_color = g:flog_green_color
+if exists("g:flog_low_color")
+  let s:low_color = g:flog_low_color
 endif
 
-if exists("g:flog_orange_color")
-  let s:orange_color = g:flog_orange_color
+if exists("g:flog_medium_color")
+  let s:medium_color = g:flog_medium_color
 endif
 
-if exists("g:flog_red_color")
-  let s:red_color = g:flog_red_color
+if exists("g:flog_high_color")
+  let s:high_color = g:flog_high_color
 endif
 
 if exists("g:flog_background_color")
   let s:background_color = g:flog_background_color
 endif
 
-if exists("g:flog_orange_limit")
-  let s:orange_limit = g:flog_orange_limit
+if exists("g:flog_medium_limit")
+  let s:medium_limit = g:flog_medium_limit
 endif
 
-if exists("g:flog_red_limit")
-  let s:red_limit = g:flog_red_limit
+if exists("g:flog_high_limit")
+  let s:high_limit = g:flog_high_limit
 endif
 
 ruby << EOF
@@ -125,15 +125,15 @@ end
 def show_complexity(results = {})
   VIM.command ":silent sign unplace file=#{VIM::Buffer.current.name}"
   results.each do |line_number, rest|
-    orange_limit = VIM::evaluate('s:orange_limit')
-    red_limit = VIM::evaluate('s:red_limit')
+    medium_limit = VIM::evaluate('s:medium_limit')
+    high_limit = VIM::evaluate('s:high_limit')
     complexity = case rest[0]
-      when 0..orange_limit         then "green_complexity"
-      when orange_limit..red_limit then "orange_complexity"
-      else                              "red_complexity"
+      when 0..medium_limit          then "low_complexity"
+      when medium_limit..high_limit then "medium_complexity"
+      else                               "high_complexity"
     end
 		value = rest[0].to_i
-		value = 99 if value >= 100
+		value = "9+" if value >= 100
 		VIM.command ":sign define #{value.to_s} text=#{value.to_s} texthl=#{complexity}"
     VIM.command ":sign place #{line_number} line=#{line_number} name=#{value.to_s} file=#{VIM::Buffer.current.name}"
   end
@@ -142,10 +142,10 @@ end
 EOF
 
 function! s:UpdateHighlighting()
-  exe 'hi green_complexity guifg='.s:green_color
-  exe 'hi orange_complexity guifg='.s:orange_color
-  exe 'hi red_complexity guifg='.s:red_color
-	exe 'hi SignColumn guifg=#999999 guibg='.s:background_color.' gui=NONE'
+  exe 'hi low_complexity    guifg='.s:low_color
+  exe 'hi medium_complexity guifg='.s:medium_color
+  exe 'hi high_complexity   guifg='.s:high_color
+	exe 'hi SignColumn        guifg=#999999 guibg='.s:background_color.' gui=NONE'
 endfunction
 
 function! ShowComplexity()
@@ -170,9 +170,9 @@ endfunction
 
 call s:UpdateHighlighting()
 
-sign define green_color    text=XX texthl=green_complexity
-sign define orange_color text=XX texthl=orange_complexity
-sign define red_color   text=XX texthl=red_complexity
+sign define low_color    text=XX texthl=low_complexity
+sign define medium_color text=XX texthl=medium_complexity
+sign define high_color   text=XX texthl=high_complexity
 
 
 if !exists("g:flow_enable") || g:flog_enable
