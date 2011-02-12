@@ -1,8 +1,7 @@
-Ruby Cyclomatic Complexity Plugin
-=================================
+Vim Flog Plugin
+===============
 
-`rubycomplexity.vim` plugin computes how complex your methods are using Flog magic and
-neatly displays it to you in the signs column next to your code.
+Indicates the Flog number in front of the action in your Ruby code to indicate the complexity.
 
 ![Screen shot](https://github.com/skammer/vim-ruby-complexity/raw/master/Screen%20shot%202010-11-29%20at%2013.23.46.png)
 
@@ -18,55 +17,38 @@ Requirements
 Installation
 ------------
 
-curl https://github.com/fousa/vim-flog/raw/master/plugin/flog.vim -o ~/piep.vim
+First of all make sure you have a Vim installed with Ruby support. If you use MacVim than you can build your own version of Vim like [this](https://github.com/b4winckler/macvim/wiki/Building).
+
+To install the plugin just run this command in your Terminal:
+
+`curl https://github.com/fousa/vim-flog/raw/master/plugin/flog.vim -o ~/piep.vim`
+
+When this is done add `:silent exe "g:flog_enable"` to your .vimrc file.
 
 Configuration
 -------------
 
-`g:rubycomplexity_enable_at_startup`
+You can set the colors for the complexity indication with the following commands in your .vimrc:
 
-Turn automatic plugin loading on and off. Set it to `0` if you do not want to
-`call ShowComplexity()` on every read or write of \*.rb file
+- Set the color of for low complexity: <br/>
+    `let g:flog_low_color="#000000"`
 
-Colors:
+- Set the color of for medium complexity: <br/>
+    `let g:flog_medium_color="#000000"`
 
-`g:rubycomplexity_color_low`
+- Set the color of for high complexity: <br/>
+    `let g:flog_high_color="#000000"`
 
-Sets color for low compelxity signs. Default value is `"#004400"`.
+You can set the limits for the complexity indication with the following commands in your .vimrc:
 
-`g:rubycomplexity_color_medium`
+- Set the limit to switch to a medium complexity: <br/>
+    `let g:flog_medium_limit=10`
 
-Sets color for medium complexity signs. Default value is `"#bbbb00"`.
+- Set the limit to switch to a high complexity: <br/>
+    `let g:flog_high_limit=30`
 
-`g:rubycomplexity_color_high`
-
-Sets color for high complexity signs. Default value is `"#ff2222"`.
-
-Ranges:
-
-`g:rubycomplexity_medium_limit`
-
-Sets medium complexity limit. Default value is `7`.
-
-`g:rubycomplexity_high_limit`
-
-Sets high complexity limit. Default value is `14`.
-
-
-    0------7------14-------max
-           |       \
-           |        -g:rubycomplexity_high_limit
-           \
-            -g:rubycomplexity_medium_limit
-
-Known bugs
-----------
-
-* flog fails on blocks and multiline string
-* signs do not update properly in some cases
-
-Links
------
+Credits
+-------
 
 @garybernhardt's [pycomplexity.vim](http://bitbucket.org/garybernhardt/pycomplexity).
 
