@@ -39,24 +39,24 @@ Configuration
 You can set the colors for the complexity indication with the following commands in your .vimrc:
 
 * Set the color of for low complexity: <br/>
-    `let g:flog_low_color="#a5c261"`
+    `:silent exe "let g:flog_low_color=#a5c261"`
 
 * Set the color of for medium complexity: <br/>
-    `let g:flog_medium_color="#ffc66d"`
+    `:silent exe "let g:flog_medium_color=#ffc66d"`
 
 * Set the color of for high complexity: <br/>
-    `let g:flog_high_color="#cc7833"`
+    `:silent exe "let g:flog_high_color=#cc7833"`
 
 * Set the background color: <br/>
-    `let g:flog_background_color="#323232"`
+    `:silent exe "let g:flog_background_color=#323232"`
 
 You can set the limits for the complexity indication with the following commands in your .vimrc:
 
 * Set the limit to switch to a medium complexity: <br/>
-    `let g:flog_medium_limit=10`
+    `:silent exe "let g:flog_medium_limit=10"`
 
 * Set the limit to switch to a high complexity: <br/>
-    `let g:flog_high_limit=20`
+    :silent exe "`let g:flog_high_limit=20"`
 
 Credits
 -------
