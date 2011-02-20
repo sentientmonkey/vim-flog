@@ -12,7 +12,7 @@ Requirements
 
 * ruby
 * flog rubygem
-* vim 7.2+, compiled with:
+* vim 7.3+, compiled with:
   * +ruby
   * +signs
 
