@@ -23,7 +23,7 @@ First of all make sure you have a Vim installed with Ruby support. If you use Ma
 
 Here is an example of my configuration during the build:
 
-`./configure --with-features=huge --enable-rubyinterp --enable-pythininterp --enable-perlinterp --enable-cscope`
+`./configure --with-features=huge --enable-rubyinterp --enable-pythoninterp --enable-perlinterp --enable-cscope`
 
 Install the Flog gem like this: `gem install flog`.
 
