@@ -26,6 +26,7 @@ require 'rubygems'
 require 'flog'
 
 class Flog
+  # MONKEY: endline addition
   def in_method(name, file, line, endline=nil)
     endline = line if endline.nil?
     method_name = Regexp === name ? name.inspect : name.to_s
@@ -35,6 +36,7 @@ class Flog
     @method_stack.shift
   end
 
+  # MONKEY: exp.last.line addition
   def process_defn(exp)
     in_method exp.shift, exp.file, exp.line, exp.last.line do
       process_until_empty exp
@@ -42,6 +44,7 @@ class Flog
     s()
   end
 
+  # MONKEY: exp.last.line addition
   def process_defs(exp)
     recv = process exp.shift
     in_method "::#{exp.shift}", exp.file, exp.line, exp.last.line do
@@ -58,25 +61,31 @@ class Flog
       recv = exp.first
 
       # DSL w/ names. eg task :name do ... end
-      if (recv[0] == :call and recv[1] == nil and recv.arglist[1] and
-          [:lit, :str].include? recv.arglist[1][0]) then
-          msg = recv[2]
-          submsg = recv.arglist[1][1]
-          in_klass msg do
-            lastline = exp.last.respond_to?(:line) ? exp.last.line : nil # zomg teh hax!
-            # This is really weird. If a block has nothing in it, then for some
-            # strange reason exp.last becomes nil. I really don't care why this
-            # happens, just an annoying fact.
-            in_method submsg, exp.file, exp.line, lastline do
-              process_until_empty exp
-            end
+      #   looks like s(:call, nil, :task, s(:lit, :name))
+      #           or s(:call, nil, :task, s(:str, "name"))
+      #           or s(:call, nil, :task, s(:hash, s(:lit, :name) ...))
+
+      t, r, m, *a = recv
+
+      if t == :call and r == nil and submsg = dsl_name?(a) then
+        m = "#{m}(#{submsg})" if m and [String, Symbol].include?(submsg.class)
+        in_klass m do                             # :task/namespace
+          # MONKEY: addition of lastline passing
+          lastline = exp.last.respond_to?(:line) ? exp.last.line : nil
+          in_method submsg, exp.file, exp.line, lastline do # :name
+            process_until_empty exp
           end
-          return s()
+        end
+        return s()
       end
     end
+
     add_to_score :branch
-    exp.delete 0
-    process exp.shift
+
+    exp.delete 0 # { || ... } has 0 in arg slot
+
+    process exp.shift # no penalty for LHS
+
     penalize_by 0.1 do
       process_until_empty exp
     end
@@ -104,16 +113,17 @@ end
 
 def show_complexity(results = {})
   VIM.command ":silent sign unplace file=#{VIM::Buffer.current.name}"
+  medium_limit = VIM::evaluate('s:medium_limit')
+  high_limit = VIM::evaluate('s:high_limit')
+
   results.each do |line_number, rest|
-    medium_limit = VIM::evaluate('s:medium_limit')
-    high_limit = VIM::evaluate('s:high_limit')
     complexity = case rest[0]
       when 0..medium_limit          then "LowComplexity"
       when medium_limit..high_limit then "MediumComplexity"
       else                               "HighComplexity"
     end
 		value = rest[0].to_i
-		value = "9+" if value >= 100
+		value = "9+" if value >= 99
 		VIM.command ":sign define l#{value.to_s} text=#{value.to_s} texthl=Sign#{complexity}"
     VIM.command ":sign place #{line_number} line=#{line_number} name=l#{value.to_s} file=#{VIM::Buffer.current.name}"
   end
