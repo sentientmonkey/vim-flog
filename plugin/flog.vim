@@ -26,6 +26,21 @@ require 'rubygems'
 require 'flog'
 
 class Flog
+  def flog_snippet(code, file = __FILE__)
+    @parser = RubyParser.new
+
+    begin
+      ast = @parser.process(code, file)
+    rescue Timeout::Error
+      warn "TIMEOUT parsing #{file}. Skipping."
+      return
+    end
+
+    mass[file] = ast.mass
+    process ast
+  rescue RubyParser::SyntaxError, Racc::ParseError => e
+  end
+
   def return_report
     complexity_results = {}
     max = option[:all] ? nil : total * THRESHOLD
@@ -53,10 +68,9 @@ def show_complexity(results = {})
       when medium_limit..high_limit then "MediumComplexity"
       else                               "HighComplexity"
     end
-		value = score.to_i
-		value = "9+" if value >= 99
-		VIM.command ":sign define l#{value.to_s} text=#{value.to_s} texthl=Sign#{complexity}"
-    VIM.command ":sign place #{line_number} line=#{line_number} name=l#{value.to_s} file=#{VIM::Buffer.current.name}"
+    value = score >= 100 ? "9+" : score.to_i
+		VIM.command ":sign define #{value} text=#{value} texthl=Sign#{complexity}"
+    VIM.command ":sign place #{line_number} line=#{line_number} name=#{value} file=#{VIM::Buffer.current.name}"
   end
 end
 
@@ -66,16 +80,20 @@ function! ShowComplexity()
 ruby << EOF
   options = {
     :quiet    => true,
-    :continue => true,
     :all      => true
   }
 
+  buffer = ::VIM::Buffer.current
+  # nasty hack, but there is no read all...
+  code = (1..buffer.count).map{|i| buffer[i]}.join("\n")
+
   flogger = Flog.new options
-  flogger.flog ::VIM::Buffer.current.name
+  flogger.flog_snippet code, buffer.name
+  #flogger.flog ::VIM::Buffer.current.name
   show_complexity flogger.return_report
 EOF
 endfunction
 
 if !exists("g:flow_enable") || g:flog_enable
-  au bufnewfile,bufread *.rb call ShowComplexity()
+  au bufnewfile,bufread,InsertLeave *.rb call ShowComplexity()
 endif
