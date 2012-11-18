@@ -136,5 +136,5 @@ EOF
 endfunction
 
 if !exists("g:flow_enable") || g:flog_enable
-  autocmd! BufReadPost,BufWritePost,FileReadPost,FileWritePost *.rb call ShowComplexity()
+  au bufnewfile,bufread *.rb call ShowComplexity()
 endif
