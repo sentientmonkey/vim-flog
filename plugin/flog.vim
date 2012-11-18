@@ -9,28 +9,8 @@ if !has('signs') || !has('ruby')
   finish
 endif
 
-let s:low_color        = "#a5c261"
-let s:medium_color     = "#ffc66d"
-let s:high_color       = "#cc7833"
-let s:background_color = "#323232"
 let s:medium_limit     = 10
 let s:high_limit       = 20
-
-if exists("g:flog_low_color")
-  let s:low_color = g:flog_low_color
-endif
-
-if exists("g:flog_medium_color")
-  let s:medium_color = g:flog_medium_color
-endif
-
-if exists("g:flog_high_color")
-  let s:high_color = g:flog_high_color
-endif
-
-if exists("g:flog_background_color")
-  let s:background_color = g:flog_background_color
-endif
 
 if exists("g:flog_medium_limit")
   let s:medium_limit = g:flog_medium_limit
@@ -128,52 +108,32 @@ def show_complexity(results = {})
     medium_limit = VIM::evaluate('s:medium_limit')
     high_limit = VIM::evaluate('s:high_limit')
     complexity = case rest[0]
-      when 0..medium_limit          then "low_complexity"
-      when medium_limit..high_limit then "medium_complexity"
-      else                               "high_complexity"
+      when 0..medium_limit          then "LowComplexity"
+      when medium_limit..high_limit then "MediumComplexity"
+      else                               "HighComplexity"
     end
 		value = rest[0].to_i
 		value = "9+" if value >= 100
-		VIM.command ":sign define #{value.to_s} text=#{value.to_s} texthl=#{complexity}"
-    VIM.command ":sign place #{line_number} line=#{line_number} name=#{value.to_s} file=#{VIM::Buffer.current.name}"
+		VIM.command ":sign define l#{value.to_s} text=#{value.to_s} texthl=Sign#{complexity}"
+    VIM.command ":sign place #{line_number} line=#{line_number} name=l#{value.to_s} file=#{VIM::Buffer.current.name}"
   end
 end
 
 EOF
 
-function! s:UpdateHighlighting()
-  exe 'hi low_complexity    guifg='.s:low_color
-  exe 'hi medium_complexity guifg='.s:medium_color
-  exe 'hi high_complexity   guifg='.s:high_color
-	exe 'hi SignColumn        guifg=#999999 guibg='.s:background_color.' gui=NONE'
-endfunction
-
 function! ShowComplexity()
-
 ruby << EOF
+  options = {
+    :quiet    => true,
+    :continue => true,
+    :all      => true
+  }
 
-options = {
-      :quiet    => true,
-      :continue => true,
-      :all      => true
-    }
-
-flogger = Flog.new options
-flogger.flog ::VIM::Buffer.current.name
-show_complexity flogger.return_report
-
+  flogger = Flog.new options
+  flogger.flog ::VIM::Buffer.current.name
+  show_complexity flogger.return_report
 EOF
-
-call s:UpdateHighlighting()
-
 endfunction
-
-call s:UpdateHighlighting()
-
-sign define low_color    text=XX texthl=low_complexity
-sign define medium_color text=XX texthl=medium_complexity
-sign define high_color   text=XX texthl=high_complexity
-
 
 if !exists("g:flow_enable") || g:flog_enable
   autocmd! BufReadPost,BufWritePost,FileReadPost,FileWritePost *.rb call ShowComplexity()

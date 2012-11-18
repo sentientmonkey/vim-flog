@@ -1,7 +1,7 @@
 Vim Flog Plugin
 ===============
 
-_(Forked from [Ruby Cyclomatic Complexity Plugin](https://github.com/skammer/vim-ruby-complexity) created by @skammer)_
+Personal version of fousa/vim-flog plugin.
 
 Indicates the Flog number in front of the action in your Ruby code to indicate the complexity.
 
@@ -36,19 +36,11 @@ When this is done add `:silent exe "g:flog_enable"` to your .vimrc file.
 Configuration
 -------------
 
-You can set the colors for the complexity indication with the following commands in your .vimrc:
+To change colors of sings, use the `higlight` command. The used groups are
 
-* Set the color of for low complexity: <br/>
-    `:silent exe "let g:flog_low_color=#a5c261"`
-
-* Set the color of for medium complexity: <br/>
-    `:silent exe "let g:flog_medium_color=#ffc66d"`
-
-* Set the color of for high complexity: <br/>
-    `:silent exe "let g:flog_high_color=#cc7833"`
-
-* Set the background color: <br/>
-    `:silent exe "let g:flog_background_color=#323232"`
+* SignLowComplexity
+* SignMediumComplexity
+* SignHighComplexity
 
 You can set the limits for the complexity indication with the following commands in your .vimrc:
 
