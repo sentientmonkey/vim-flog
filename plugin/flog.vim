@@ -21,7 +21,7 @@ if exists("g:flog_high_limit")
 endif
 
 ruby << EOF
-
+$VERBOSE = nil # turn of those pesky warnings...
 require 'rubygems'
 require 'flog'
 
@@ -31,14 +31,15 @@ class Flog
 
     begin
       ast = @parser.process(code, file)
-    rescue Timeout::Error
-      warn "TIMEOUT parsing #{file}. Skipping."
-      return
+    rescue
+      return false
     end
 
     mass[file] = ast.mass
     process ast
+    return true
   rescue RubyParser::SyntaxError, Racc::ParseError => e
+    return false
   end
 
   def return_report
@@ -88,9 +89,10 @@ ruby << EOF
   code = (1..buffer.count).map{|i| buffer[i]}.join("\n")
 
   flogger = Flog.new options
-  flogger.flog_snippet code, buffer.name
+  if flogger.flog_snippet code, buffer.name
   #flogger.flog ::VIM::Buffer.current.name
-  show_complexity flogger.return_report
+    show_complexity flogger.return_report
+  end
 EOF
 endfunction
 
