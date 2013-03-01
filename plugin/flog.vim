@@ -22,8 +22,13 @@ endif
 
 ruby << EOF
 $VERBOSE = nil # turn of those pesky warnings...
-require 'rubygems'
-require 'flog'
+begin
+  require 'rubygems'
+  require 'flog'
+  FLOG_LOADED = true
+rescue LoadError
+  FLOG_LOADED = false
+end
 
 class Flog
   def flog_snippet(code, file = __FILE__)
@@ -84,14 +89,16 @@ ruby << EOF
     :all      => true
   }
 
-  buffer = ::VIM::Buffer.current
-  # nasty hack, but there is no read all...
-  code = (1..buffer.count).map{|i| buffer[i]}.join("\n")
+  if FLOG_LOADED
+    buffer = ::VIM::Buffer.current
+    # nasty hack, but there is no read all...
+    code = (1..buffer.count).map{|i| buffer[i]}.join("\n")
 
-  flogger = Flog.new options
-  if flogger.flog_snippet code, buffer.name
-  #flogger.flog ::VIM::Buffer.current.name
-    show_complexity flogger.return_report
+    flogger = Flog.new options
+    if flogger.flog_snippet code, buffer.name
+    #flogger.flog ::VIM::Buffer.current.name
+      show_complexity flogger.return_report
+    end
   end
 EOF
 endfunction
