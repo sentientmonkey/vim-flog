@@ -103,6 +103,6 @@ ruby << EOF
 EOF
 endfunction
 
-if !exists("g:flow_enable") || g:flog_enable
+if !exists("g:flog_enable") || g:flog_enable
   au bufnewfile,bufread,InsertLeave *.rb call ShowComplexity()
 endif
