@@ -103,6 +103,42 @@ ruby << EOF
 EOF
 endfunction
 
+function! HideComplexity()
+ruby << EOF
+  if FLOG_LOADED
+    VIM.command ":redir @a"
+    VIM.command ":silent sign place file=#{VIM::Buffer.current.name}"
+    VIM.command ":redir END"
+    placed_signs = VIM.evaluate "@a"
+    placed_signs.lines.map(&:chomp).select{|s| s.include? 'id='}.each do |sign|
+      id = Hash[*sign.split(' ').map{|s| s.split('=')}.flatten]['id']
+      VIM.command ":sign unplace #{id} file=#{VIM::Buffer.current.name}"
+    end
+  end
+EOF
+endfunction
+
+function! FlogDisable()
+  let g:flog_enable = 0
+  call HideComplexity()
+endfunction
+command FlogDisable call FlogDisable()
+
+function! FlogEnable()
+  let g:flog_enable = 1
+  call ShowComplexity()
+endfunction
+command FlogEnable call FlogEnable()
+
+function! FlogToggle()
+  if g:flog_enabled
+    call FlogDisable()
+  else
+    call FlogEnable()
+  endif
+endfunction
+command FlogToggle call FlogToggle()
+
 if !exists("g:flog_enable") || g:flog_enable
   au bufnewfile,bufread,InsertLeave *.rb call ShowComplexity()
 endif
