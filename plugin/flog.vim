@@ -95,7 +95,7 @@ ruby << EOF
 
     flogger = Flog.new options
     if flogger.flog_snippet code, buffer.name
-    #flogger.flog ::VIM::Buffer.current.name
+      flogger.flog ::VIM::Buffer.current.name
       show_complexity flogger.return_report
     end
   end
