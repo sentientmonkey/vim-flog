@@ -130,7 +130,7 @@ endfunction
 command FlogEnable call FlogEnable()
 
 function! FlogToggle()
-  if g:flog_enabled
+  if exists("g:flog_enable") && g:flog_enable
     call FlogDisable()
   else
     call FlogEnable()
