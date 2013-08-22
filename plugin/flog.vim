@@ -35,7 +35,7 @@ class Flog
     @parser = RubyParser.new
 
     begin
-      ast = @parser.process(code, file)
+      return false unless ast = @parser.process(code, file)
     rescue
       return false
     end
