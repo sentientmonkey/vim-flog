@@ -49,8 +49,7 @@ class Flog
 
   def return_report
     complexity_results = {}
-    max = option[:all] ? nil : total * THRESHOLD
-    each_by_score max do |class_method, score, call_list|
+    each_by_score threshold do |class_method, score, call_list|
       location = @method_locations[class_method]
       if location then
         line = location.match(/.+:(\d+)/).to_a[1]
