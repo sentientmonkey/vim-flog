@@ -121,13 +121,13 @@ function! FlogDisable()
   let g:flog_enable = 0
   call HideComplexity()
 endfunction
-command FlogDisable call FlogDisable()
+command! FlogDisable call FlogDisable()
 
 function! FlogEnable()
   let g:flog_enable = 1
   call ShowComplexity()
 endfunction
-command FlogEnable call FlogEnable()
+command! FlogEnable call FlogEnable()
 
 function! FlogToggle()
   if exists("g:flog_enable") && g:flog_enable
@@ -136,7 +136,7 @@ function! FlogToggle()
     call FlogEnable()
   endif
 endfunction
-command FlogToggle call FlogToggle()
+command! FlogToggle call FlogToggle()
 
 if !exists("g:flog_enable") || g:flog_enable
   au BufNewFile,BufRead,BufWritePost,InsertLeave *.rb call ShowComplexity()
