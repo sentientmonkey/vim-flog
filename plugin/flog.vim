@@ -35,7 +35,7 @@ class Flog
     @parser = RubyParser.new
 
     begin
-      ast = @parser.process(code, file)
+      return false unless ast = @parser.process(code, file)
     rescue
       return false
     end
@@ -49,8 +49,7 @@ class Flog
 
   def return_report
     complexity_results = {}
-    max = option[:all] ? nil : total * THRESHOLD
-    each_by_score max do |class_method, score, call_list|
+    each_by_score threshold do |class_method, score, call_list|
       location = @method_locations[class_method]
       if location then
         line = location.match(/.+:(\d+)/).to_a[1]
@@ -96,7 +95,7 @@ ruby << EOF
 
     flogger = Flog.new options
     if flogger.flog_snippet code, buffer.name
-    #flogger.flog ::VIM::Buffer.current.name
+      flogger.flog ::VIM::Buffer.current.name
       show_complexity flogger.return_report
     end
   end
@@ -131,7 +130,7 @@ endfunction
 command FlogEnable call FlogEnable()
 
 function! FlogToggle()
-  if g:flog_enabled
+  if exists("g:flog_enable") && g:flog_enable
     call FlogDisable()
   else
     call FlogEnable()
@@ -140,5 +139,5 @@ endfunction
 command FlogToggle call FlogToggle()
 
 if !exists("g:flog_enable") || g:flog_enable
-  au bufnewfile,bufread,InsertLeave *.rb call ShowComplexity()
+  au BufNewFile,BufRead,BufWritePost,InsertLeave *.rb call ShowComplexity()
 endif
