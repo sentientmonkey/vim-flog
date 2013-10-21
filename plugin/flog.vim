@@ -9,27 +9,27 @@ if !has('signs') || !has('ruby')
   finish
 endif
 
-let s:low_color        = "#a5c261"
-let s:medium_color     = "#ffc66d"
-let s:high_color       = "#cc7833"
-let s:background_color = "#323232"
+let s:low_color_hl     = "term=standout ctermfg=118 ctermbg=235 guifg=#a5c261 guibg=#323232"
+let s:medium_color_hl  = "term=standout ctermfg=81 ctermbg=235 guifg=#ffc66d guibg=#323232"
+let s:high_color_hl    = "term=standout cterm=bold ctermfg=199 ctermbg=16 gui=bold guifg=#cc7833 guibg=#232526"
+let s:background_hl    = "guifg=#999999 guibg=#323232 gui=NONE"
 let s:medium_limit     = 10
 let s:high_limit       = 20
 
-if exists("g:flog_low_color")
-  let s:low_color = g:flog_low_color
+if exists("g:flog_low_color_hl")
+  let s:low_color_hl = g:flog_low_color_hl
 endif
 
-if exists("g:flog_medium_color")
-  let s:medium_color = g:flog_medium_color
+if exists("g:flog_medium_color_hl")
+  let s:medium_color_hl = g:flog_medium_color_hl
 endif
 
-if exists("g:flog_high_color")
-  let s:high_color = g:flog_high_color
+if exists("g:flog_high_color_hl")
+  let s:high_color_hl = g:flog_high_color_hl
 endif
 
-if exists("g:flog_background_color")
-  let s:background_color = g:flog_background_color
+if exists("g:flog_background_hl")
+  let s:high_background_hl = g:flog_high_background_hl
 endif
 
 if exists("g:flog_medium_limit")
@@ -132,9 +132,9 @@ def show_complexity(results = {})
       when medium_limit..high_limit then "medium_complexity"
       else                               "high_complexity"
     end
-		value = rest[0].to_i
-		value = "9+" if value >= 100
-		VIM.command ":sign define #{value.to_s} text=#{value.to_s} texthl=#{complexity}"
+        value = rest[0].to_i
+        value = "9+" if value >= 100
+        VIM.command ":sign define #{value.to_s} text=#{value.to_s} texthl=#{complexity}"
     VIM.command ":sign place #{line_number} line=#{line_number} name=#{value.to_s} file=#{VIM::Buffer.current.name}"
   end
 end
@@ -142,10 +142,10 @@ end
 EOF
 
 function! s:UpdateHighlighting()
-  exe 'hi low_complexity    guifg='.s:low_color
-  exe 'hi medium_complexity guifg='.s:medium_color
-  exe 'hi high_complexity   guifg='.s:high_color
-	exe 'hi SignColumn        guifg=#999999 guibg='.s:background_color.' gui=NONE'
+  exe 'hi low_complexity    '.s:low_color_hl
+  exe 'hi medium_complexity '.s:medium_color_hl
+  exe 'hi high_complexity   '.s:high_color_hl
+  exe 'hi SignColumn        '.s:background_hl
 endfunction
 
 function! ShowComplexity()
@@ -168,13 +168,38 @@ call s:UpdateHighlighting()
 
 endfunction
 
+function! HideComplexity()
+  sign unplace *
+call s:UpdateHighlighting()
+
+endfunction
+
+function! EnableFlog()
+  let g:flog_enable=1
+  call ShowComplexity()
+  autocmd! BufReadPost,BufWritePost,FileReadPost,FileWritePost *.rb call ShowComplexity()
+endfunction
+
+function! DisableFlog()
+  let g:flog_enable=0
+  call HideComplexity()
+  autocmd! BufReadPost,BufWritePost,FileReadPost,FileWritePost *.rb
+endfunction
+
+function! ToggleFlog()
+  if !exists("g:flog_enable") || g:flog_enable
+    call DisableFlog()
+  else
+    call EnableFlog()
+  end
+endfunction
+
 call s:UpdateHighlighting()
 
 sign define low_color    text=XX texthl=low_complexity
 sign define medium_color text=XX texthl=medium_complexity
 sign define high_color   text=XX texthl=high_complexity
 
-
-if !exists("g:flow_enable") || g:flog_enable
-  autocmd! BufReadPost,BufWritePost,FileReadPost,FileWritePost *.rb call ShowComplexity()
+if !exists("g:flog_enable") || g:flog_enable
+  call EnableFlog()
 endif
