@@ -61,16 +61,15 @@ You can set the limits for the complexity indication with the following commands
 You can also turn flog off and on:
 
 * Turn on flog
-    :call EnableFlog()
+    `:call EnableFlog()`
 
 * Turn off flog
-    :call DisableFlog()
+    `:call DisableFlog()`
 
 * Toggle flog
-    :call ToggleFlog()
+    `:call ToggleFlog()`
 
 Additionally, you can map this in your .vimrc:
-
     `:map ,f :call ToggleFlog()<cr>`
 
 Credits
