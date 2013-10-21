@@ -39,16 +39,16 @@ Configuration
 You can set the colors for the complexity indication with the following commands in your .vimrc:
 
 * Set the color of for low complexity: <br/>
-    `:silent exe "let g:flog_low_color=#a5c261"`
+    `:let g:flog_low_color_hl = "term=standout ctermfg=118 ctermbg=235 guifg=#999999 guibg=#323232"`
 
 * Set the color of for medium complexity: <br/>
-    `:silent exe "let g:flog_medium_color=#ffc66d"`
+    `:let g:flog_medium_color_hl = "term=standout ctermfg=81 ctermbg=235 guifg=#66D9EF guibg=#323232"`
 
 * Set the color of for high complexity: <br/>
-    `:silent exe "let g:flog_high_color=#cc7833"`
+    `:let g:flog_high_color_hl = "term=standout cterm=bold ctermfg=199 ctermbg=16 gui=bold guifg=#F92672 guibg=#232526"`
 
 * Set the background color: <br/>
-    `:silent exe "let g:flog_background_color=#323232"`
+    `:let s:background_hl    = "guifg=#999999 guibg=#323232 gui=NONE"`
 
 You can set the limits for the complexity indication with the following commands in your .vimrc:
 
@@ -57,6 +57,21 @@ You can set the limits for the complexity indication with the following commands
 
 * Set the limit to switch to a high complexity: <br/>
     :silent exe "`let g:flog_high_limit=20"`
+
+You can also turn flog off and on:
+
+* Turn on flog
+    :call EnableFlog()
+
+* Turn off flog
+    :call DisableFlog()
+
+* Toggle flog
+    :call ToggleFlog()
+
+Additionally, you can map this in your .vimrc:
+
+    `:map ,f :call ToggleFlog()<cr>`
 
 Credits
 -------
