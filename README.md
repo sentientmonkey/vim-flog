@@ -58,6 +58,20 @@ You can hide some levels of complexity:
 * Hide medium complexity: <br/>
     `:silent exe "let g:flog_hide_medium=1"`
 
+You can also turn flog off and on:
+
+* Turn on flog
+    `:call FlogEnable()`
+
+* Turn off flog
+    `:call FlogDisable()`
+
+* Toggle flog
+    `:call FlogToggle()`
+
+Additionally, you can map this in your .vimrc:
+    `:map ,f :call FlogToggle()<cr>`
+
 Credits
 -------
 
