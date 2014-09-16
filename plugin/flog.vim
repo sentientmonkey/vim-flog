@@ -139,5 +139,5 @@ endfunction
 command! FlogToggle call FlogToggle()
 
 if !exists("g:flog_enable") || g:flog_enable
-  au BufNewFile,BufRead,BufWritePost,InsertLeave *.rb call ShowComplexity()
+  au BufRead,BufWritePost *.rb call ShowComplexity()
 endif
