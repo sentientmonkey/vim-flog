@@ -9,28 +9,8 @@ if !has('signs') || !has('ruby')
   finish
 endif
 
-let s:low_color        = "#a5c261"
-let s:medium_color     = "#ffc66d"
-let s:high_color       = "#cc7833"
-let s:background_color = "#323232"
 let s:medium_limit     = 10
 let s:high_limit       = 20
-
-if exists("g:flog_low_color")
-  let s:low_color = g:flog_low_color
-endif
-
-if exists("g:flog_medium_color")
-  let s:medium_color = g:flog_medium_color
-endif
-
-if exists("g:flog_high_color")
-  let s:high_color = g:flog_high_color
-endif
-
-if exists("g:flog_background_color")
-  let s:background_color = g:flog_background_color
-endif
 
 if exists("g:flog_medium_limit")
   let s:medium_limit = g:flog_medium_limit
@@ -41,79 +21,39 @@ if exists("g:flog_high_limit")
 endif
 
 ruby << EOF
-
-require 'rubygems'
-require 'flog'
+$VERBOSE = nil # turn of those pesky warnings...
+begin
+  require 'rubygems'
+  require 'flog'
+  FLOG_LOADED = true
+rescue LoadError
+  FLOG_LOADED = false
+end
 
 class Flog
-  def in_method(name, file, line, endline=nil)
-    endline = line if endline.nil?
-    method_name = Regexp === name ? name.inspect : name.to_s
-    @method_stack.unshift method_name
-    @method_locations[signature] = "#{file}:#{line}:#{endline}"
-    yield
-    @method_stack.shift
-  end
+  def flog_snippet(code, file = __FILE__)
+    @parser = RubyParser.new
 
-  def process_defn(exp)
-    in_method exp.shift, exp.file, exp.line, exp.last.line do
-      process_until_empty exp
+    begin
+      return false unless ast = @parser.process(code, file)
+    rescue
+      return false
     end
-    s()
-  end
 
-  def process_defs(exp)
-    recv = process exp.shift
-    in_method "::#{exp.shift}", exp.file, exp.line, exp.last.line do
-      process_until_empty exp
-    end
-    s()
-  end
-
-  def process_iter(exp)
-    context = (self.context - [:class, :module, :scope])
-    context = context.uniq.sort_by { |s| s.to_s }
-
-    if context == [:block, :iter] or context == [:iter] then
-      recv = exp.first
-
-      # DSL w/ names. eg task :name do ... end
-      if (recv[0] == :call and recv[1] == nil and recv.arglist[1] and
-          [:lit, :str].include? recv.arglist[1][0]) then
-          msg = recv[2]
-          submsg = recv.arglist[1][1]
-          in_klass msg do
-            lastline = exp.last.respond_to?(:line) ? exp.last.line : nil # zomg teh hax!
-            # This is really weird. If a block has nothing in it, then for some
-            # strange reason exp.last becomes nil. I really don't care why this
-            # happens, just an annoying fact.
-            in_method submsg, exp.file, exp.line, lastline do
-              process_until_empty exp
-            end
-          end
-          return s()
-      end
-    end
-    add_to_score :branch
-    exp.delete 0
-    process exp.shift
-    penalize_by 0.1 do
-      process_until_empty exp
-    end
-    s()
+    mass[file] = ast.mass
+    process ast
+    return true
+  rescue RubyParser::SyntaxError, Racc::ParseError => e
+    return false
   end
 
   def return_report
     complexity_results = {}
-    max = option[:all] ? nil : total * THRESHOLD
-    each_by_score max do |class_method, score, call_list|
+    each_by_score threshold do |class_method, score, call_list|
       location = @method_locations[class_method]
       if location then
-        line, endline = location.match(/.+:(\d+):(\d+)/).to_a[1..2].map{|l| l.to_i }
-        # This is a strange case of flog failing on blocks.
-        # http://blog.zenspider.com/2009/04/parsetree-eol.html
-        line, endline = endline-1, line if line >= endline
-        complexity_results[line] = [score, class_method, endline]
+        line = location.match(/.+:(\d+)/).to_a[1]
+        complexity_results[line] = [score, class_method]
       end
     end
     complexity_results
@@ -123,58 +63,81 @@ class Flog
 end
 
 def show_complexity(results = {})
-  VIM.command ":silent sign unplace file=#{VIM::Buffer.current.name}"
-  results.each do |line_number, rest|
-    medium_limit = VIM::evaluate('s:medium_limit')
-    high_limit = VIM::evaluate('s:high_limit')
-    complexity = case rest[0]
-      when 0..medium_limit          then "low_complexity"
-      when medium_limit..high_limit then "medium_complexity"
-      else                               "high_complexity"
+  VIM.command ":silent sign unplace *"
+  medium_limit = VIM::evaluate('s:medium_limit')
+  high_limit = VIM::evaluate('s:high_limit')
+
+  results.each do |line_number, (score, method)|
+    complexity = case score
+      when 0..medium_limit          then "LowComplexity"
+      when medium_limit..high_limit then "MediumComplexity"
+      else                               "HighComplexity"
     end
-		value = rest[0].to_i
-		value = "9+" if value >= 100
-		VIM.command ":sign define #{value.to_s} text=#{value.to_s} texthl=#{complexity}"
-    VIM.command ":sign place #{line_number} line=#{line_number} name=#{value.to_s} file=#{VIM::Buffer.current.name}"
+    value = score >= 100 ? "9+" : score.to_i
+		VIM.command ":sign define #{value} text=#{value} texthl=Sign#{complexity}"
+    VIM.command ":sign place #{line_number} line=#{line_number} name=#{value} file=#{VIM::Buffer.current.name}"
   end
 end
 
 EOF
 
-function! s:UpdateHighlighting()
-  exe 'hi low_complexity    guifg='.s:low_color
-  exe 'hi medium_complexity guifg='.s:medium_color
-  exe 'hi high_complexity   guifg='.s:high_color
-	exe 'hi SignColumn        guifg=#999999 guibg='.s:background_color.' gui=NONE'
-endfunction
-
 function! ShowComplexity()
-
 ruby << EOF
+  options = {
+    :quiet    => true,
+    :all      => true
+  }
 
-options = {
-      :quiet    => true,
-      :continue => true,
-      :all      => true
-    }
+  if FLOG_LOADED
+    buffer = ::VIM::Buffer.current
+    # nasty hack, but there is no read all...
+    code = (1..buffer.count).map{|i| buffer[i]}.join("\n")
 
-flogger = Flog.new options
-flogger.flog ::VIM::Buffer.current.name
-show_complexity flogger.return_report
-
+    flogger = Flog.new options
+    if flogger.flog_snippet code, buffer.name
+      flogger.flog ::VIM::Buffer.current.name
+      show_complexity flogger.return_report
+    end
+  end
 EOF
-
-call s:UpdateHighlighting()
-
 endfunction
 
-call s:UpdateHighlighting()
+function! HideComplexity()
+ruby << EOF
+  if FLOG_LOADED
+    VIM.command ":redir @a"
+    VIM.command ":silent sign place file=#{VIM::Buffer.current.name}"
+    VIM.command ":redir END"
+    placed_signs = VIM.evaluate "@a"
+    placed_signs.lines.map(&:chomp).select{|s| s.include? 'id='}.each do |sign|
+      id = Hash[*sign.split(' ').map{|s| s.split('=')}.flatten]['id']
+      VIM.command ":sign unplace #{id} file=#{VIM::Buffer.current.name}"
+    end
+  end
+EOF
+endfunction
 
-sign define low_color    text=XX texthl=low_complexity
-sign define medium_color text=XX texthl=medium_complexity
-sign define high_color   text=XX texthl=high_complexity
+function! FlogDisable()
+  let g:flog_enable = 0
+  call HideComplexity()
+endfunction
+command! FlogDisable call FlogDisable()
 
+function! FlogEnable()
+  let g:flog_enable = 1
+  call ShowComplexity()
+endfunction
+command! FlogEnable call FlogEnable()
 
-if !exists("g:flow_enable") || g:flog_enable
-  autocmd! BufReadPost,BufWritePost,FileReadPost,FileWritePost *.rb call ShowComplexity()
+function! FlogToggle()
+  if exists("g:flog_enable") && g:flog_enable
+    call FlogDisable()
+  else
+    call FlogEnable()
+  endif
+endfunction
+command! FlogToggle call FlogToggle()
+
+if !exists("g:flog_enable") || g:flog_enable
+  au BufNewFile,BufRead,BufWritePost,InsertLeave *.rb call ShowComplexity()
 endif
