@@ -11,6 +11,16 @@ endif
 
 let s:medium_limit     = 10
 let s:high_limit       = 20
+let s:hide_low         = 0
+let s:hide_medium      = 0
+
+if exists("g:flog_hide_low")
+  let s:hide_low = g:flog_hide_low
+endif
+
+if exists("g:flog_hide_medium")
+  let s:hide_medium = g:flog_hide_medium
+endif
 
 if exists("g:flog_medium_limit")
   let s:medium_limit = g:flog_medium_limit
@@ -63,9 +73,14 @@ class Flog
 end
 
 def show_complexity(results = {})
-  VIM.command ":silent sign unplace * file=#{VIM::Buffer.current.name}"
   medium_limit = VIM::evaluate('s:medium_limit')
-  high_limit = VIM::evaluate('s:high_limit')
+  high_limit   = VIM::evaluate('s:high_limit')
+  hide_medium  = VIM::evaluate('s:hide_medium')
+  hide_low     = VIM::evaluate('s:hide_low')
+
+  VIM.command ":silent sign unplace * file=#{VIM::Buffer.current.name}"
+  VIM.command ":sign define FlogDummySign"
+  VIM.command ":sign place 9999 line=1 name=FlogDummySign file=#{VIM::Buffer.current.name}"
 
   results.each do |line_number, (score, method)|
     complexity = case score
@@ -74,8 +89,11 @@ def show_complexity(results = {})
       else                               "HighComplexity"
     end
     value = score >= 100 ? "9+" : score.to_i
-		VIM.command ":sign define #{value} text=#{value} texthl=Sign#{complexity}"
-    VIM.command ":sign place #{line_number} line=#{line_number} name=#{value} file=#{VIM::Buffer.current.name}"
+    value = nil if (hide_low == 1 && value < medium_limit) || (hide_medium == 1 && value < high_limit)
+    if value
+      VIM.command ":sign define #{value} text=#{value} texthl=Sign#{complexity}" if value
+      VIM.command ":sign place #{line_number} line=#{line_number} name=#{value} file=#{VIM::Buffer.current.name}"
+    end
   end
 end
 
