@@ -63,7 +63,7 @@ class Flog
 end
 
 def show_complexity(results = {})
-  VIM.command ":silent sign unplace *"
+  VIM.command ":silent sign unplace * file=#{VIM::Buffer.current.name}"
   medium_limit = VIM::evaluate('s:medium_limit')
   high_limit = VIM::evaluate('s:high_limit')
 
