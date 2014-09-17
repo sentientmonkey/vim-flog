@@ -58,6 +58,14 @@ You can set the limits for the complexity indication with the following commands
 * Set the limit to switch to a high complexity: <br/>
     :silent exe "`let g:flog_high_limit=20"`
 
+You can hide some levels of complexity:
+
+* Hide low complexity: <br/>
+    `:silent exe "let g:flog_hide_low=1"`
+
+* Hide medium complexity: <br/>
+    `:silent exe "let g:flog_hide_medium=1"`
+
 You can also turn flog off and on:
 
 * Turn on flog

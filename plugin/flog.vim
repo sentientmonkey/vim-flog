@@ -15,6 +15,16 @@ let s:high_color_hl    = "term=standout cterm=bold ctermfg=199 ctermbg=16 gui=bo
 let s:background_hl    = "guifg=#999999 guibg=#323232 gui=NONE"
 let s:medium_limit     = 10
 let s:high_limit       = 20
+let s:hide_low = 0
+let s:hide_medium = 0
+
+if exists("g:flog_hide_low")
+  let s:hide_low = g:flog_hide_low
+endif
+
+if exists("g:flog_hide_medium")
+  let s:hide_medium = g:flog_hide_medium
+endif
 
 if exists("g:flog_low_color_hl")
   let s:low_color_hl = g:flog_low_color_hl
@@ -132,9 +142,19 @@ def show_complexity(results = {})
       when medium_limit..high_limit then "medium_complexity"
       else                               "high_complexity"
     end
-        value = rest[0].to_i
-        value = "9+" if value >= 100
-        VIM.command ":sign define #{value.to_s} text=#{value.to_s} texthl=#{complexity}"
+    value = rest[0].to_i
+    value = "9+" if value >= 100
+    VIM.command ":sign define #{value.to_s} text=#{value.to_s} texthl=#{complexity}"
+    render_score line_number, value, medium_limit, high_limit
+  end
+end
+
+def render_score(line_number, value, medium_limit, high_limit)
+  hide_medium = VIM::evaluate 's:hide_medium'
+  hide_low = VIM::evaluate 's:hide_low'
+  if (hide_low == 1 && value < medium_limit) || (hide_medium == 1 && value < high_limit)
+    VIM.command ":sign unplace #{line_number}"
+  else
     VIM.command ":sign place #{line_number} line=#{line_number} name=#{value.to_s} file=#{VIM::Buffer.current.name}"
   end
 end
@@ -176,7 +196,9 @@ endfunction
 
 function! EnableFlog()
   let g:flog_enable=1
-  call ShowComplexity()
+  if &filetype == 'ruby'
+    call ShowComplexity()
+  endif
   autocmd! BufReadPost,BufWritePost,FileReadPost,FileWritePost *.rb call ShowComplexity()
 endfunction
 
