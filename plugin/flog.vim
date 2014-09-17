@@ -91,7 +91,7 @@ def show_complexity(results = {})
     value = score >= 100 ? "9+" : score.to_i
     value = nil if (hide_low == 1 && value < medium_limit) || (hide_medium == 1 && value < high_limit)
     if value
-      VIM.command ":sign define #{value} text=#{value} texthl=Sign#{complexity}" if value
+      VIM.command ":sign define #{value} text=#{value} texthl=Sign#{complexity}"
       VIM.command ":sign place #{line_number} line=#{line_number} name=#{value} file=#{VIM::Buffer.current.name}"
     end
   end
