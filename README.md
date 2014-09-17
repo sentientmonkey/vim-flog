@@ -1,7 +1,7 @@
 Vim Flog Plugin
 ===============
 
-Personal version of fousa/vim-flog plugin.
+_(Forked from [Ruby Cyclomatic Complexity Plugin](https://github.com/skammer/vim-ruby-complexity) created by @skammer)_
 
 Indicates the Flog number in front of the action in your Ruby code to indicate the complexity.
 
