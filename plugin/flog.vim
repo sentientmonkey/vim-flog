@@ -196,7 +196,9 @@ endfunction
 
 function! EnableFlog()
   let g:flog_enable=1
-  call ShowComplexity()
+  if &filetype == 'ruby'
+    call ShowComplexity()
+  endif
   autocmd! BufReadPost,BufWritePost,FileReadPost,FileWritePost *.rb call ShowComplexity()
 endfunction
 
