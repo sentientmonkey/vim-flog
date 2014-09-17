@@ -29,7 +29,7 @@ Install the Flog gem like this: `gem install flog`.
 
 To install the plugin just run this command in your Terminal:
 
-`curl https://github.com/fousa/vim-flog/raw/master/plugin/flog.vim -o ~/.vim/plugin/flog.vim`
+`curl https://raw.github.com/fousa/vim-flog/master/plugin/flog.vim -o ~/.vim/plugin/flog.vim`
 
 When this is done add `:silent exe "g:flog_enable"` to your .vimrc file.
 

@@ -31,7 +31,6 @@ if exists("g:flog_high_limit")
 endif
 
 ruby << EOF
-$VERBOSE = nil # turn of those pesky warnings...
 begin
   require 'rubygems'
   require 'flog'
@@ -96,7 +95,6 @@ def show_complexity(results = {})
     end
   end
 end
-
 EOF
 
 function! ShowComplexity()
@@ -159,5 +157,5 @@ endfunction
 command! FlogToggle call FlogToggle()
 
 if !exists("g:flog_enable") || g:flog_enable
-  au BufRead,BufWritePost *.rb call ShowComplexity()
+  au BufReadPost,BufWritePost,FileReadPost,FileWritePost *.rb call ShowComplexity()
 endif
