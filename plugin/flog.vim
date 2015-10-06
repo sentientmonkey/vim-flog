@@ -87,7 +87,7 @@ def show_complexity(results = {})
       when medium_limit..high_limit then "MediumComplexity"
       else                               "HighComplexity"
     end
-    value = score >= 100 ? "9+" : score.to_i
+    value = score >= 100 ? 99 : score.to_i
     value = nil if (hide_low == 1 && value < medium_limit) || (hide_medium == 1 && value < high_limit)
     if value
       VIM.command ":sign define #{value} text=#{value} texthl=Sign#{complexity}"
