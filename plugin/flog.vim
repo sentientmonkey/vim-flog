@@ -40,25 +40,9 @@ rescue LoadError
 end
 
 class Flog
-  def flog_snippet(code, file = __FILE__)
-    @parser = RubyParser.new
-
-    begin
-      return false unless ast = @parser.process(code, file)
-    rescue
-      return false
-    end
-
-    mass[file] = ast.mass
-    process ast
-    return true
-  rescue RubyParser::SyntaxError, Racc::ParseError => e
-    return false
-  end
-
   def return_report
     complexity_results = {}
-    each_by_score threshold do |class_method, score, call_list|
+    each_by_score(threshold) do |class_method, score, call_list|
       location = @method_locations[class_method]
       if location then
         line = location.match(/.+:(\d+)/).to_a[1]
@@ -87,7 +71,7 @@ def show_complexity(results = {})
       when medium_limit..high_limit then "MediumComplexity"
       else                               "HighComplexity"
     end
-    value = score >= 100 ? 99 : score.to_i
+    value = score >= 100 ? 99 : score.round
     value = nil if (hide_low == 1 && value < medium_limit) || (hide_medium == 1 && value < high_limit)
     if value
       VIM.command ":sign define #{value} text=#{value} texthl=Sign#{complexity}"
@@ -112,10 +96,9 @@ ruby << EOF
     code = (1..buffer.count).map{|i| buffer[i]}.join("\n")
 
     flogger = Flog.new options
-    if flogger.flog_snippet code, buffer.name
-      flogger.flog ::VIM::Buffer.current.name
-      show_complexity flogger.return_report
-    end
+    flogger.flog_ruby `cat #{::VIM::Buffer.current.name}`
+    flogger.calculate_total_scores
+    show_complexity flogger.return_report
   end
 EOF
 endfunction
