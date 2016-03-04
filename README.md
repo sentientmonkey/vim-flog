@@ -36,19 +36,11 @@ When this is done add `:silent exe "g:flog_enable"` to your .vimrc file.
 Configuration
 -------------
 
-You can set the colors for the complexity indication with the following commands in your .vimrc:
+To change colors of sings, use the `higlight` command. The used groups are
 
-* Set the color of for low complexity: <br/>
-    `:let g:flog_low_color_hl = "term=standout ctermfg=118 ctermbg=235 guifg=#999999 guibg=#323232"`
-
-* Set the color of for medium complexity: <br/>
-    `:let g:flog_medium_color_hl = "term=standout ctermfg=81 ctermbg=235 guifg=#66D9EF guibg=#323232"`
-
-* Set the color of for high complexity: <br/>
-    `:let g:flog_high_color_hl = "term=standout cterm=bold ctermfg=199 ctermbg=16 gui=bold guifg=#F92672 guibg=#232526"`
-
-* Set the background color: <br/>
-    `:let s:background_hl    = "guifg=#999999 guibg=#323232 gui=NONE"`
+* SignLowComplexity
+* SignMediumComplexity
+* SignHighComplexity
 
 You can set the limits for the complexity indication with the following commands in your .vimrc:
 
@@ -69,16 +61,16 @@ You can hide some levels of complexity:
 You can also turn flog off and on:
 
 * Turn on flog
-    `:call EnableFlog()`
+    `:call FlogEnable()`
 
 * Turn off flog
-    `:call DisableFlog()`
+    `:call FlogDisable()`
 
 * Toggle flog
-    `:call ToggleFlog()`
+    `:call FlogToggle()`
 
 Additionally, you can map this in your .vimrc:
-    `:map ,f :call ToggleFlog()<cr>`
+    `:map ,f :call FlogToggle()<cr>`
 
 Credits
 -------
